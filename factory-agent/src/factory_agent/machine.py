@@ -1,5 +1,6 @@
 import datetime
 from factory_agent import sensor_reading
+import time
 
 class Machine:
     def __init__(self, machine_id: str, machine_type: str,
@@ -18,5 +19,32 @@ class Machine:
                                             self.temperature_celsius, self.status,
                                             self.runtime_seconds, error_code=None,
                                             timestamp=timestamp)
-        return data        
+        return data      
+    
+    def advance_time(self):
+        match self.status:
+            case "running":
+                self.increment_runtime()
+                self.heat_up_temperature()
+            
+            case "sleep":
+                self.cool_down_temperature()
+    
+    def increment_runtime(self):
+        self.runtime_seconds += 60
+    
+    def heat_up_temperature(self):
+        self.temperature_celsius += 0.5
+        
+    def cool_down_temperature(self):
+        self.temperature_celsius -= 0.3
+        
+    def set_state_running(self):
+        self.status = "running"
+        
+    def set_state_sleep(self):
+        self.status = "sleep"         
+                
+        
+          
                 

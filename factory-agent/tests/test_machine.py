@@ -1,7 +1,7 @@
 from factory_agent.machine import Machine
 import datetime
 
-def test_create_machine():
+def test_init_machine():
     
     machine = Machine("Maschine01", "Lift", 65.3, "running", 3600)
     
@@ -11,7 +11,7 @@ def test_create_machine():
     assert machine.status == "running"
     assert machine.runtime_seconds == 3600
     
-def test_machine_create_sensor_reading():
+def test_create_sensor_reading():
     timestamp = datetime.datetime(1989, 12, 22, 12, 0, 0)
     
     machine = Machine("Maschine01", "Lift", 65.3, "running", 3600)
@@ -24,5 +24,23 @@ def test_machine_create_sensor_reading():
     assert data.runtime_seconds == 3600
     assert data.error_code == None
     assert data.timestamp == timestamp
+    
+def test_advance_time():
+    machine = Machine("Maschine01", "Lift", 65.3, "sleep", 3600)
+    machine.set_state_running()
+    machine.advance_time()
+    
+    assert machine.runtime_seconds == 3660
+    assert machine.temperature_celsius == 65.8
+    
+def test_sleep_and_cool_down():
+    machine = Machine("Maschine01", "Lift", 70.3, "running", 3750)
+    machine.set_state_sleep()
+    machine.advance_time()
+    
+    assert machine.runtime_seconds == 3750
+    assert machine.temperature_celsius == 70.0
+    
+          
     
     
