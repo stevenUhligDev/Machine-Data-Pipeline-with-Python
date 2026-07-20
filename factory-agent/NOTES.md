@@ -18,9 +18,16 @@
 
 
 ## Possible Classees
-- Machine
-- SensorReading
-- FactoryAgent
+# Machine
+- Machine responsibilities:
+    - stores machine_id
+    - stores machine_type
+    - stores current temperature
+    - stores current status
+    - stores runtime_seconds
+    - can create a SensorReading from its current state
+    - SensorReading
+    - FactoryAgent
 
 
 ## Error cases
