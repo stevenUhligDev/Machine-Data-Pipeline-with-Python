@@ -42,7 +42,7 @@ def test_sleep_and_cool_down():
     assert machine.runtime_seconds == 3750
     assert machine.temperature_celsius == pytest.approx(70.0)
     
-def test_error_overheat():
+def test_machine_overheat():
     machine = Machine("Maschine01", "Lift", 80.3, "running", 3750)
     machine.check_overheat()
     data = machine.create_sensor_reading()
@@ -52,6 +52,23 @@ def test_error_overheat():
     assert data.status == "error"
     assert data.error_code == "ERR_OVERHEAT"
     
-          
+def test_machine_does_not_overheat_under_limit():
+    machine = Machine("Maschine01", "Lift", 79, "running", 3750)
+    machine.check_overheat()
+    data = machine.create_sensor_reading()
     
+    assert machine.status == "running"
+    assert machine.error_code is None
+    assert data.status == "running"
+    assert data.error_code is None
+    
+def test_machine_does_not_overheat_on_limit():
+    machine = Machine("Maschine01", "Lift", 80, "running", 3750)
+    machine.check_overheat()
+    data = machine.create_sensor_reading()
+    
+    assert machine.status == "running"
+    assert machine.error_code is None
+    assert data.status == "running"
+    assert data.error_code is None
     
