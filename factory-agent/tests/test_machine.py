@@ -1,5 +1,6 @@
 from factory_agent.machine import Machine
 import datetime
+import pytest
 
 def test_init_machine():
     
@@ -39,7 +40,7 @@ def test_sleep_and_cool_down():
     machine.advance_time()
     
     assert machine.runtime_seconds == 3750
-    assert machine.temperature_celsius == 70.0
+    assert machine.temperature_celsius == pytest.approx(70.0)
     
 def test_error_overheat():
     machine = Machine("Maschine01", "Lift", 80.3, "running", 3750)
