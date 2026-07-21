@@ -13,3 +13,4 @@ class SensorReading:
 	timestamp: datetime
  
 
+

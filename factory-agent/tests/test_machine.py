@@ -22,7 +22,7 @@ def test_create_sensor_reading():
     assert data.temperature_celsius == 65.3
     assert data.status == "running"
     assert data.runtime_seconds == 3600
-    assert data.error_code == None
+    assert data.error_code is None
     assert data.timestamp == timestamp
     
 def test_advance_time():
@@ -40,6 +40,16 @@ def test_sleep_and_cool_down():
     
     assert machine.runtime_seconds == 3750
     assert machine.temperature_celsius == 70.0
+    
+def test_error_overheat():
+    machine = Machine("Maschine01", "Lift", 80.3, "running", 3750)
+    machine.check_overheat()
+    data = machine.create_sensor_reading()
+    
+    assert machine.status == "error"
+    assert machine.error_code == "ERR_OVERHEAT"
+    assert data.status == "error"
+    assert data.error_code == "ERR_OVERHEAT"
     
           
     
