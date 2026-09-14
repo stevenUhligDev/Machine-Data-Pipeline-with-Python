@@ -1,4 +1,4 @@
-# SmartFactory-SecureOps Lite
+# Machine Data Pipeline with Python
 
 
 ## Project Goal
