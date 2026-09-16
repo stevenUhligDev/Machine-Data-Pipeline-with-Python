@@ -45,9 +45,15 @@
 ## Current Status
 
 - Phase 1: Factory Agent is in progress.
+  
 - Local Python project setup is complete.
+  
 - Basic package structure with `src` layout is working.
+  
 - `Machine`, `SensorReading`, and `Agent` are implemented.
+  
 - Unit tests with pytest are passing.
+  
 - The agent can register machines, create sensor readings, collect current readings, and keep a reading history.
+  
 - Sensor reading creation was refactored from `Machine` into `Agent` to improve separation of responsibilities.
