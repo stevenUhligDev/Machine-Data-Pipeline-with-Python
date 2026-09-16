@@ -57,3 +57,11 @@
 - The agent can register machines, create sensor readings, collect current readings, and keep a reading history.
   
 - Sensor reading creation was refactored from `Machine` into `Agent` to improve separation of responsibilities.
+
+- `run_cycle` is implemented and tested
+
+- A cycle currently advances registered machines, checks for overheating and then collects sensor readings.
+
+- Overheated machines are marked with status `error` and error_code `ERR_OVERHEAT` before sensor readings are created
+
+- Tests cover machine behavior, sensor reading creation, reading collections, history handling, and the agent run cycle
