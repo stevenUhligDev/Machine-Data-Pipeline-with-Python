@@ -62,3 +62,28 @@ def test_collect_sensor_readings():
     
     assert isinstance(current_readings[0], sensor_reading.SensorReading)
     assert isinstance(current_readings[1], sensor_reading.SensorReading)
+    
+def test_collect_sensor_readings_keeps_history():
+    agent = Agent()
+    machine1 = Machine("Maschine01", "Lift", 65.3, "running", 3600)
+    machine2 = Machine("Maschine02", "robotic arm", 60.0, "running", 2100)
+    agent.add_machine(machine1)
+    agent.add_machine(machine2)
+    
+    first_readings = agent.collect_sensor_readings()
+    second_readings = agent.collect_sensor_readings()
+    
+    assert len(first_readings) == 2
+    assert len(second_readings) == 2
+    assert len(agent.sensor_readings) == 4
+    
+    assert isinstance(agent.sensor_readings[0], sensor_reading.SensorReading)
+    assert isinstance(agent.sensor_readings[1], sensor_reading.SensorReading)
+    assert isinstance(agent.sensor_readings[2], sensor_reading.SensorReading)
+    assert isinstance(agent.sensor_readings[3], sensor_reading.SensorReading)
+    
+    assert agent.sensor_readings[0].machine_id == "Maschine01"
+    assert agent.sensor_readings[1].machine_id == "Maschine02"
+    assert agent.sensor_readings[2].machine_id == "Maschine01"
+    assert agent.sensor_readings[3].machine_id == "Maschine02"
+    
