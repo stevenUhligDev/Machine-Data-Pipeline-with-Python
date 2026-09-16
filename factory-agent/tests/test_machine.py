@@ -1,5 +1,4 @@
 from factory_agent.machine import Machine
-import datetime
 import pytest
 
 def test_init_machine():
@@ -11,20 +10,6 @@ def test_init_machine():
     assert machine.temperature_celsius == 65.3
     assert machine.status == "running"
     assert machine.runtime_seconds == 3600
-    
-def test_create_sensor_reading():
-    timestamp = datetime.datetime(1989, 12, 22, 12, 0, 0)
-    
-    machine = Machine("Maschine01", "Lift", 65.3, "running", 3600)
-    data = machine.create_sensor_reading()
-    
-    assert data.machine_id == "Maschine01"
-    assert data.machine_type == "Lift"
-    assert data.temperature_celsius == 65.3
-    assert data.status == "running"
-    assert data.runtime_seconds == 3600
-    assert data.error_code is None
-    assert data.timestamp == timestamp
     
 def test_advance_time():
     machine = Machine("Maschine01", "Lift", 65.3, "sleep", 3600)
@@ -44,31 +29,26 @@ def test_sleep_and_cool_down():
     
 def test_machine_overheat():
     machine = Machine("Maschine01", "Lift", 80.3, "running", 3750)
+    
     machine.check_overheat()
-    data = machine.create_sensor_reading()
     
     assert machine.status == "error"
     assert machine.error_code == "ERR_OVERHEAT"
-    assert data.status == "error"
-    assert data.error_code == "ERR_OVERHEAT"
     
 def test_machine_does_not_overheat_under_limit():
     machine = Machine("Maschine01", "Lift", 79, "running", 3750)
     machine.check_overheat()
-    data = machine.create_sensor_reading()
+
     
     assert machine.status == "running"
     assert machine.error_code is None
-    assert data.status == "running"
-    assert data.error_code is None
     
 def test_machine_does_not_overheat_on_limit():
     machine = Machine("Maschine01", "Lift", 80, "running", 3750)
     machine.check_overheat()
-    data = machine.create_sensor_reading()
+    
     
     assert machine.status == "running"
     assert machine.error_code is None
-    assert data.status == "running"
-    assert data.error_code is None
+    
     

@@ -10,7 +10,7 @@ class SensorReading:
 	status: str
 	runtime_seconds: int
 	error_code: str | None
-	timestamp: datetime
+	timestamp: datetime.datetime
  
 
 
