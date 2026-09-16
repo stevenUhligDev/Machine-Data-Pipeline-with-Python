@@ -1,7 +1,9 @@
+import datetime
+
+import pytest
+from factory_agent import sensor_reading
 from factory_agent.agent import Agent
 from factory_agent.machine import Machine
-from factory_agent import sensor_reading
-import datetime
 
 
 def test_init_agent():
@@ -35,7 +37,7 @@ def test_create_sensor_reading():
     assert isinstance(data, sensor_reading.SensorReading)
     assert data.machine_id == "Maschine01"
     assert data.machine_type == "Lift"
-    assert data.temperature_celsius == 65.3
+    assert data.temperature_celsius == pytest.approx(65.3)
     assert data.status == "running"
     assert data.runtime_seconds == 3600
     assert data.error_code is None
@@ -86,4 +88,52 @@ def test_collect_sensor_readings_keeps_history():
     assert agent.sensor_readings[1].machine_id == "Maschine02"
     assert agent.sensor_readings[2].machine_id == "Maschine01"
     assert agent.sensor_readings[3].machine_id == "Maschine02"
+    
+
+def test_run_cycle_advances_running_machines():
+    agent = Agent()
+    machine1 = Machine("Maschine01", "Lift", 65.3, "running", 3600)
+    machine2 = Machine("Maschine02", "Lift", 70, "running", 2600)
+   
+    agent.add_machine(machine1)
+    agent.add_machine(machine2)
+    
+    current_readings = agent.run_cycle()
+    
+    
+    assert current_readings[0].status == "running"
+    assert current_readings[0].temperature_celsius == pytest.approx(65.8)
+    assert current_readings[0].runtime_seconds == 3660
+    
+    assert current_readings[1].status == "running"
+    assert current_readings[1].temperature_celsius == pytest.approx(70.5)
+    assert current_readings[1].runtime_seconds == 2660
+    
+    assert len(current_readings) == 2
+    assert len(agent.sensor_readings) == 2
+    
+def test_run_cycle_marks_overheated_machine_before_collecting_reading():
+    agent = Agent()
+    machine1 = Machine("Maschine01", "Lift", 80, "running", 3600)
+    
+    agent.add_machine(machine1)
+    
+    current_readings = agent.run_cycle()
+    
+    assert current_readings[0].temperature_celsius == pytest.approx(80.5)
+    assert current_readings[0].status == "error"
+    assert current_readings[0].error_code == "ERR_OVERHEAT"
+    
+    assert machine1.temperature_celsius == pytest.approx(80.5)
+    assert machine1.status == "error"
+    assert machine1.error_code == "ERR_OVERHEAT"
+    
+    assert len(current_readings) == 1
+    assert len(agent.sensor_readings) == 1
+    
+    
+    
+
+    
+    
     

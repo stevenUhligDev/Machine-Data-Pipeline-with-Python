@@ -1,6 +1,8 @@
+import datetime
+
 from factory_agent import sensor_reading
 from factory_agent.machine import Machine
-import datetime
+
 
 class Agent:
     
@@ -32,5 +34,19 @@ class Agent:
             current_sensor_readings.append(data)
         
         return current_sensor_readings
+    
+    def run_cycle(self):
+        for machine in self.machines:
+            machine.advance_time()
+            machine.check_overheat()
+        current_sensor_readings = self.collect_sensor_readings()
+        return current_sensor_readings
+              
+        
+            
+            
+        
+            
+            
     
     

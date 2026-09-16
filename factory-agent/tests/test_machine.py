@@ -1,5 +1,6 @@
-from factory_agent.machine import Machine
 import pytest
+from factory_agent.machine import Machine
+
 
 def test_init_machine():
     
