@@ -2,6 +2,7 @@ import pytest
 from factory_agent.machine import Machine
 
 
+
 def test_init_machine():
     
     machine = Machine("Maschine01", "Lift", 65.3, "running", 3600)

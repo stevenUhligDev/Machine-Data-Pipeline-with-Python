@@ -64,4 +64,8 @@
 
 - Overheated machines are marked with status `error` and error_code `ERR_OVERHEAT` before sensor readings are created
 
-- Tests cover machine behavior, sensor reading creation, reading collections, history handling, and the agent run cycle
+- `SensorReading` can be converted into a dictionary with `to_dict()`.
+
+- Sensor readings can be serialized from dictionary format into JSON and loaded back into a Python dictionary.
+
+- Tests cover machine behavior, sensor reading creation, reading collection, history handling, run cycle behavior, dictionary conversion, and JSON serialization.

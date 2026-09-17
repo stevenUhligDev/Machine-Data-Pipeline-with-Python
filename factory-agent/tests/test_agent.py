@@ -6,6 +6,7 @@ from factory_agent.agent import Agent
 from factory_agent.machine import Machine
 
 
+
 def test_init_agent():
     agent = Agent()
     
@@ -131,6 +132,7 @@ def test_run_cycle_marks_overheated_machine_before_collecting_reading():
     assert len(current_readings) == 1
     assert len(agent.sensor_readings) == 1
     
+
     
     
 
