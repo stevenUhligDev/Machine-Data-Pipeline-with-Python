@@ -17,6 +17,12 @@
 - `error_code`
 - `timestamp`
 
+These fields are used both by the factory agent and by the backend API.
+
+The agent creates sensor readings internally.
+
+The backend receives sensor readings as JSON data.
+
 ## Current Classes
 
 ### Machine
@@ -59,6 +65,18 @@ Current cycle order:
 2. check for overheating
 3. collect sensor readings
 
+### Backend / API
+
+Responsibilities:
+
+- provides a FastAPI application
+- exposes a health endpoint with `GET /health`
+- exposes a first readings endpoint with `POST /readings`
+- receives sensor reading data in JSON format
+- validates incoming request bodies with Pydantic
+- returns validated reading data for valid requests
+- rejects invalid or incomplete requests with validation errors
+
 ## Error Cases
 
 - `machine_id` is missing or empty
@@ -69,6 +87,9 @@ Current cycle order:
 - sensor reading contains missing required fields
 - overheated machine is marked with status `error`
 - overheated machine receives error code `ERR_OVERHEAT`
+- API request body is missing required fields
+- API request body contains invalid data types
+- backend rejects invalid sensor reading data with status code `422`
 
 ## Implemented Tests
 
@@ -86,24 +107,65 @@ Current cycle order:
 - Agent can collect current sensor readings
 - Agent keeps a reading history
 - Agent run cycle advances machines, checks overheating, and collects readings
+- Backend health endpoint returns status code `200`
+- Backend health endpoint returns status `ok`
+- `POST /readings` accepts valid sensor reading data
+- `POST /readings` returns status code `201` for valid data
+- `POST /readings` returns the validated reading data
+- `POST /readings` rejects missing required fields
+- Missing `machine_id` returns status code `422`
 
 ## FastAPI Backend Planning
 
-### Planned Endpoint
+### Current Backend Structure
 
-`POST /readings`
+The backend is located in the `backend` directory.
 
-The endpoint will receive sensor reading data in JSON format.
+The importable Python package is called `factory_backend`.
 
-Valid sensor readings should be accepted.
+Current backend structure:
 
-Invalid sensor readings should be rejected.
+- `backend/src/factory_backend/main.py`
+- `backend/src/factory_backend/__init__.py`
+- `backend/tests/test_readings_api.py`
+- `backend/pyproject.toml`
 
-### Validation
+### Current Backend Goal
 
-Pydantic will be used to validate the incoming data.
+The current backend goal is not full data processing yet.
 
-The following fields should be validated:
+The first goal is to make sure that the API can receive sensor reading data, validate it, and return a predictable response.
+
+Data storage, forwarding, database integration, and authentication are planned for later steps.
+
+### Implemented Endpoints
+
+#### `GET /health`
+
+The health endpoint is used as a simple smoke test.
+
+It checks whether the FastAPI application is reachable.
+
+Expected response:
+
+- status code `200`
+- response body contains status `ok`
+
+#### `POST /readings`
+
+The readings endpoint receives sensor reading data in JSON format.
+
+The endpoint currently validates incoming data with a Pydantic model.
+
+Valid sensor readings are accepted.
+
+Invalid or incomplete sensor readings are rejected by FastAPI/Pydantic validation.
+
+### Reading Model
+
+The API uses a Pydantic model called `Reading`.
+
+The model validates the following fields:
 
 - `machine_id`
 - `machine_type`
@@ -113,10 +175,64 @@ The following fields should be validated:
 - `error_code`
 - `timestamp`
 
-### Expected Behavior
+Required fields:
 
-A valid sensor reading should contain all required fields with the correct data types.
+- `machine_id`
+- `machine_type`
+- `temperature_celsius`
+- `status`
+- `runtime_seconds`
+- `timestamp`
 
-Invalid or incomplete sensor readings should return a validation error.
+Optional fields:
 
-The endpoint should later be able to process, store, or forward incoming readings.
+- `error_code`
+
+### Current API Behavior
+
+A valid sensor reading sent to `POST /readings` should return:
+
+- status code `201`
+- the validated reading data in the response body
+
+A sensor reading with a missing required field, for example `machine_id`, should return:
+
+- status code `422`
+
+This validation is handled automatically by FastAPI and Pydantic before the endpoint logic is executed.
+
+The current `POST /readings` endpoint does not store readings permanently yet.
+
+At this stage, it validates the incoming request body and returns the validated reading data.
+
+This keeps the first backend step small and testable.
+
+### Implemented API Tests
+
+- Health endpoint returns status code `200`
+- Health endpoint returns status `ok`
+- `POST /readings` accepts a valid sensor reading
+- `POST /readings` returns status code `201` for valid data
+- `POST /readings` returns the validated reading data
+- `POST /readings` rejects a request with missing `machine_id`
+- Invalid request data returns status code `422`
+
+## Current Learning Focus
+
+- difference between Python dictionaries and JSON
+- converting internal Python objects into JSON-friendly data
+- understanding HTTP `POST` requests
+- understanding FastAPI endpoints
+- using Pydantic models for request body validation
+- testing API behavior with `TestClient`
+- distinguishing valid requests from invalid requests
+
+## Next Steps
+
+- Add more validation tests for invalid sensor reading data.
+- Test missing required fields such as `timestamp`, `status`, and `runtime_seconds`.
+- Test invalid data types, for example a string instead of an integer for `runtime_seconds`.
+- Add stricter validation rules for allowed machine status values.
+- Add stricter validation rules for realistic temperature values.
+- Decide whether accepted readings should be stored in memory before adding a database.
+- Prepare the backend for receiving sensor readings from the factory agent.
