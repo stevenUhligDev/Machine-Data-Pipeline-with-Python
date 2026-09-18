@@ -9,13 +9,13 @@
 
 ## Shared Sensor Data
 
-- machine_id
-- machine_type
-- temperature_celsius
-- status
-- runtime_seconds
-- error_code
-- timestamp
+- `machine_id`
+- `machine_type`
+- `temperature_celsius`
+- `status`
+- `runtime_seconds`
+- `error_code`
+- `timestamp`
 
 ## Current Classes
 
@@ -86,3 +86,37 @@ Current cycle order:
 - Agent can collect current sensor readings
 - Agent keeps a reading history
 - Agent run cycle advances machines, checks overheating, and collects readings
+
+## FastAPI Backend Planning
+
+### Planned Endpoint
+
+`POST /readings`
+
+The endpoint will receive sensor reading data in JSON format.
+
+Valid sensor readings should be accepted.
+
+Invalid sensor readings should be rejected.
+
+### Validation
+
+Pydantic will be used to validate the incoming data.
+
+The following fields should be validated:
+
+- `machine_id`
+- `machine_type`
+- `temperature_celsius`
+- `status`
+- `runtime_seconds`
+- `error_code`
+- `timestamp`
+
+### Expected Behavior
+
+A valid sensor reading should contain all required fields with the correct data types.
+
+Invalid or incomplete sensor readings should return a validation error.
+
+The endpoint should later be able to process, store, or forward incoming readings.
