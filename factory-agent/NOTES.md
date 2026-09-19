@@ -76,6 +76,8 @@ Responsibilities:
 - validates incoming request bodies with Pydantic
 - returns validated reading data for valid requests
 - rejects invalid or incomplete requests with validation errors
+- stores validated sensor readings temporarily in memory
+- provides stored sensor readings through `GET /readings`
 
 ## Error Cases
 
@@ -114,6 +116,10 @@ Responsibilities:
 - `POST /readings` returns the validated reading data
 - `POST /readings` rejects missing required fields
 - Missing `machine_id` returns status code `422`
+- Missing `timestamp` returns status code `422`
+- `GET /readings` returns an empty list when no readings exist
+- `GET /readings` returns a previously created reading
+- API tests use an autouse pytest fixture for isolated in-memory storage
 
 ## FastAPI Backend Planning
 
@@ -161,6 +167,12 @@ Valid sensor readings are accepted.
 
 Invalid or incomplete sensor readings are rejected by FastAPI/Pydantic validation.
 
+#### `GET /readings`
+
+The endpoint returns the sensor readings currently stored in memory.
+
+If no readings exist, it returns an empty list.
+
 ### Reading Model
 
 The API uses a Pydantic model called `Reading`.
@@ -207,6 +219,12 @@ At this stage, it validates the incoming request body and returns the validated 
 
 This keeps the first backend step small and testable.
 
+Accepted readings are currently stored in memory.
+
+The storage is temporary and is cleared when the application restarts.
+
+`GET /readings` can be used to retrieve the currently stored readings.
+
 ### Implemented API Tests
 
 - Health endpoint returns status code `200`
@@ -216,6 +234,51 @@ This keeps the first backend step small and testable.
 - `POST /readings` returns the validated reading data
 - `POST /readings` rejects a request with missing `machine_id`
 - Invalid request data returns status code `422`
+- `POST /readings` rejects a request with missing `timestamp`
+- `GET /readings` returns an empty list when no readings exist
+- `GET /readings` returns a previously created reading
+- API tests use isolated in-memory storage
+
+## Problem Documentation
+
+### Separate In-Memory Lists
+
+Problem:
+The storage test remained empty after sending a reading.
+
+Cause:
+The endpoint and the test initially used separate local lists.
+
+Solution:
+The shared `sensor_readings` list was moved to module level.
+
+Learning:
+Shared application state must be accessible by all components that use it.
+
+### UnboundLocalError with `sensor_readings`
+
+Problem:
+Accessing `sensor_readings` caused an `UnboundLocalError`.
+
+Cause:
+The module-level list was deleted inside the endpoint with `del`.
+
+Solution:
+The existing list is now modified directly with `append()`.
+
+Learning:
+A mutable module-level object can be modified without recreating or deleting it.
+
+### Shared Test State
+
+Problem:
+API tests could influence each other because they used the same in-memory storage.
+
+Solution:
+An autouse pytest fixture clears the storage before and after every API test.
+
+Learning:
+Tests should start with a defined state and should not depend on execution order.
 
 ## Current Learning Focus
 
@@ -226,13 +289,13 @@ This keeps the first backend step small and testable.
 - using Pydantic models for request body validation
 - testing API behavior with `TestClient`
 - distinguishing valid requests from invalid requests
+- understanding in-memory storage
+- understanding test isolation with pytest fixtures
+- understanding basic Create and Read API behavior
 
 ## Next Steps
 
-- Add more validation tests for invalid sensor reading data.
-- Test missing required fields such as `timestamp`, `status`, and `runtime_seconds`.
-- Test invalid data types, for example a string instead of an integer for `runtime_seconds`.
-- Add stricter validation rules for allowed machine status values.
-- Add stricter validation rules for realistic temperature values.
-- Decide whether accepted readings should be stored in memory before adding a database.
-- Prepare the backend for receiving sensor readings from the factory agent.
+- Connect the Factory Agent to the FastAPI backend using HTTP.
+- Send generated sensor readings from the agent to `POST /readings`.
+- Test the first complete data flow from machine simulation to backend.
+- Refactor backend responsibilities after the basic end-to-end data flow is working.

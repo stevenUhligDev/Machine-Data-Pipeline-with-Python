@@ -48,7 +48,7 @@
 
 ## Current Status
 
-### Phase 1: Factory Agent is mostly complete.
+- Phase 1: Factory Agent is mostly complete.
 
 - Local Python project setup is complete.
 
@@ -72,7 +72,7 @@
 
 - Sensor readings can be serialized from dictionary format into JSON and loaded back into a Python dictionary.
 
-### Phase 2: FastAPI Backend has been started.
+- Phase 2: FastAPI Backend has been started.
 
 - A separate `backend` package with `src` layout has been created.
 
@@ -88,5 +88,16 @@
 
 - Invalid sensor readings with missing required fields are rejected with status code `422`.
 
-- Tests cover machine behavior, sensor reading creation, reading collection, history handling, run cycle behavior, dictionary conversion, JSON
-  serialization, API health checks, successful reading submission, and validation errors.
+- Tests cover machine behavior, sensor reading creation, reading collection, history handling, run cycle behavior, dictionary conversion, JSON serialization, API health checks, successful reading submission, and validation errors.
+
+- The backend now stores validated sensor readings temporarily in memory.
+
+- `GET /readings` is implemented and returns the currently stored sensor readings.
+
+- `GET /readings` returns an empty list when no readings are available.
+
+- API tests use a pytest fixture to keep the in-memory storage isolated between tests.
+
+- The API now supports the basic Create and Read flow for sensor readings.
+
+- 25 automated tests are currently passing.

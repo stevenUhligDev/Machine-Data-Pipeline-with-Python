@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -11,14 +11,20 @@ class Reading(BaseModel):
     runtime_seconds: int
     error_code: str | None = None
     timestamp: datetime
-    
-    
+        
 app = FastAPI()
+
+sensor_readings = []
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
+@app.get("/readings", status_code=200)
+async def get_readings():
+    return sensor_readings
+
 @app.post("/readings", status_code=201)
-async def readings(reading: Reading):
+async def post_readings(reading: Reading):
+    sensor_readings.append(reading)
     return reading
